@@ -240,7 +240,12 @@ class WordEditorApp(tk.Tk):
         self.notebook.add(self.tab_add, text="  ➕  新規追加  ")
         self._build_tab_add()
 
-        # ─ タブ2: 一覧・編集 ─
+        # ─ タブ2: 一括テキスト入力 ─
+        self.tab_bulk = tk.Frame(self.notebook, bg=BG)
+        self.notebook.add(self.tab_bulk, text="  📄  一括入力  ")
+        self._build_tab_bulk()
+
+        # ─ タブ3: 一覧・編集 ─
         self.tab_list = tk.Frame(self.notebook, bg=BG)
         self.notebook.add(self.tab_list, text="  📋  一覧・編集  ")
         self._build_tab_list()
@@ -367,7 +372,376 @@ class WordEditorApp(tk.Tk):
                             f"現在の合計: {len(self.rows)} 語")
 
     # ══════════════════════════════════════════════════
-    # タブ2: 一覧・編集
+    # タブ2: 一括テキスト入力
+    # ══════════════════════════════════════════════════
+    def _build_tab_bulk(self):
+        # ── 説明ラベル ──
+        desc = tk.Frame(self.tab_bulk, bg=BG3, padx=14, pady=10)
+        desc.pack(fill="x")
+        tk.Label(desc, text="一括テキスト入力",
+                 font=FONT_HEAD, bg=BG3, fg=ACCENT2).pack(side="left")
+        tk.Label(desc,
+                 text="  テキストを貼り付けて「🔄 フォーマット変換」→「💾 CSV に保存」",
+                 font=FONT_SMALL, bg=BG3, fg=TEXT_DIM).pack(side="left")
+
+        # ── フォーマット説明（折りたたみ） ──
+        fmt_frame = tk.Frame(self.tab_bulk, bg=BG2, padx=18, pady=8)
+        fmt_frame.pack(fill="x")
+
+        # 対応フォーマット A（辞書コピペ形式）
+        tk.Label(fmt_frame,
+                 text="【フォーマット A】辞書コピペ形式（自動変換対応）",
+                 font=FONT_SMALL, bg=BG2, fg=YELLOW).grid(
+            row=0, column=0, sticky="w")
+        tk.Label(fmt_frame,
+                 text="  201　居る　iru　いる　Verb, Ichidan verb\tto be\n"
+                      "  ※ 番号・日本語・ローマ字・かな・品詞・意味 を含む複数行ブロック",
+                 font=FONT_MONO, bg=BG2, fg=TEXT_DIM).grid(
+            row=1, column=0, sticky="w", pady=(0, 6))
+
+        # 対応フォーマット B（CSV 1行形式）
+        tk.Label(fmt_frame,
+                 text="【フォーマット B】CSV 1行形式（直接入力）",
+                 font=FONT_SMALL, bg=BG2, fg=YELLOW).grid(
+            row=2, column=0, sticky="w")
+        tk.Label(fmt_frame,
+                 text="  食べる,taberu,たべる,\"Verb, Ichidan verb\",to eat\n"
+                      "  ※ 日本語,ローマ字,かな,品詞,意味　（かな省略可）",
+                 font=FONT_MONO, bg=BG2, fg=TEXT_DIM).grid(
+            row=3, column=0, sticky="w")
+
+        # ── テキストエリア ──
+        text_outer = tk.Frame(self.tab_bulk, bg=BG)
+        text_outer.pack(fill="both", expand=True, padx=14, pady=(8, 0))
+
+        vsb = tk.Scrollbar(text_outer, orient="vertical")
+        vsb.pack(side="right", fill="y")
+        hsb = tk.Scrollbar(text_outer, orient="horizontal")
+        hsb.pack(side="bottom", fill="x")
+
+        self.bulk_text = tk.Text(
+            text_outer,
+            font=FONT_MONO, bg=BG3, fg=TEXT,
+            insertbackground=TEXT,
+            relief="flat", bd=6,
+            wrap="none",
+            yscrollcommand=vsb.set,
+            xscrollcommand=hsb.set,
+            undo=True,
+        )
+        self.bulk_text.pack(side="left", fill="both", expand=True)
+        vsb.config(command=self.bulk_text.yview)
+        hsb.config(command=self.bulk_text.xview)
+
+        # 行番号ハイライト（入力行に色付け用タグ）
+        self.bulk_text.tag_config("error_line", background="#4a1a1a", foreground=RED)
+        self.bulk_text.tag_config("ok_line",    background="#1a3a2a", foreground=GREEN)
+
+        # ── ボタンバー ──
+        btn_bar = tk.Frame(self.tab_bulk, bg=BG3, padx=14, pady=10)
+        btn_bar.pack(fill="x")
+
+        tk.Button(btn_bar, text="🔄  フォーマット変換",
+                  command=self._bulk_convert,
+                  bg=YELLOW, fg="#1a1a2e", font=FONT_HEAD,
+                  relief="flat", cursor="hand2",
+                  padx=14, pady=6).pack(side="left", padx=(0, 10))
+
+        tk.Button(btn_bar, text="✅  プレビュー（確認）",
+                  command=self._bulk_preview,
+                  bg=ACCENT, fg=TEXT, font=FONT_BODY,
+                  relief="flat", cursor="hand2",
+                  padx=14, pady=6).pack(side="left", padx=(0, 10))
+
+        tk.Button(btn_bar, text="💾  CSV に保存",
+                  command=self._bulk_save,
+                  bg="#2d6a4f", fg=TEXT, font=FONT_HEAD,
+                  relief="flat", cursor="hand2",
+                  padx=18, pady=6).pack(side="left", padx=(0, 10))
+
+        tk.Button(btn_bar, text="🗑  クリア",
+                  command=lambda: (self.bulk_text.delete("1.0", "end"),
+                                   self._bulk_clear_tags()),
+                  bg=BG2, fg=TEXT_DIM, font=FONT_SMALL,
+                  relief="flat", cursor="hand2",
+                  padx=10, pady=6).pack(side="left")
+
+        self.bulk_status = tk.Label(btn_bar, text="",
+                                    font=FONT_SMALL, bg=BG3, fg=TEXT_DIM)
+        self.bulk_status.pack(side="right", padx=14)
+
+    def _bulk_convert(self):
+        """
+        辞書コピペ形式（フォーマットA）を CSV 1行形式（フォーマットB）に変換して
+        テキストエリアを置き換える。
+        既に CSV 形式の行はそのまま保持する。
+        """
+        import re
+        raw = self.bulk_text.get("1.0", "end")
+        lines = raw.splitlines()
+
+        # ── ブロック分割 ──────────────────────────────────
+        # 各単語ブロックは「数字で始まる行」または「空行」で区切られている
+        # 例:
+        #   201\t\n居る\niru\nいる\n\nVerb, Ichidan verb\tto be, to have
+        #   207\t\nいつ\nitsu\nPronoun\twhen
+        #
+        # ブロック収集: 番号行を見つけたら新ブロック開始
+        blocks: list[list[str]] = []
+        current: list[str] = []
+
+        NUM_RE = re.compile(r"^\d+\s*$")   # 番号だけの行（タブ除去後）
+
+        for line in lines:
+            stripped = line.strip()
+            if NUM_RE.match(stripped):
+                if current:
+                    blocks.append(current)
+                current = [stripped]
+            else:
+                current.append(stripped)
+        if current:
+            blocks.append(current)
+
+        csv_lines: list[str] = []
+        skipped: list[str] = []
+
+        for block in blocks:
+            # 空行を除いたトークン列
+            tokens = [t for t in block if t]
+
+            # ── 既に CSV 形式（カンマ区切り1行）の場合はそのまま残す ──
+            if len(tokens) == 1 and "," in tokens[0] and not NUM_RE.match(tokens[0]):
+                csv_lines.append(tokens[0])
+                continue
+
+            # tokens[0] が番号なら除去
+            if tokens and NUM_RE.match(tokens[0]):
+                tokens = tokens[1:]
+
+            if not tokens:
+                continue
+
+            # ── フィールド抽出 ──────────────────────────
+            # tokens の構成パターン（かな有り / 無し）：
+            #   [日本語, ローマ字, かな, 品詞\t意味]  ← かな有り
+            #   [日本語, ローマ字, 品詞\t意味]        ← かな無し（ローマ字で判定）
+            # 品詞と意味はタブ区切りで同一トークン内に入ることが多い
+
+            # タブを含むトークンを品詞+意味トークンとして扱う
+            def split_type_meaning(tok: str) -> tuple[str, str]:
+                if "\t" in tok:
+                    parts = tok.split("\t", 1)
+                    return parts[0].strip(), parts[1].strip()
+                return tok.strip(), ""
+
+            ROMAJI_RE = re.compile(r"^[a-zA-Z\s\-]+$")
+            KANA_RE   = re.compile(r"^[\u3040-\u30ff\u30fc]+$")
+
+            kanji = romaji = kana = word_type = meaning = ""
+
+            if len(tokens) == 1:
+                # タブ区切りで全部入っている可能性
+                parts = tokens[0].split("\t")
+                parts = [p.strip() for p in parts if p.strip()]
+                if len(parts) >= 4:
+                    kanji, romaji, kana = parts[0], parts[1], parts[2]
+                    word_type, meaning = split_type_meaning("\t".join(parts[3:]))
+                elif len(parts) == 3:
+                    kanji, romaji = parts[0], parts[1]
+                    word_type, meaning = split_type_meaning(parts[2])
+                else:
+                    skipped.append(" / ".join(tokens))
+                    continue
+
+            elif len(tokens) == 2:
+                # [日本語, 品詞\t意味] or [ローマ字, 品詞\t意味]
+                if ROMAJI_RE.match(tokens[0]):
+                    romaji = tokens[0]
+                    word_type, meaning = split_type_meaning(tokens[1])
+                else:
+                    kanji = tokens[0]
+                    word_type, meaning = split_type_meaning(tokens[1])
+
+            elif len(tokens) == 3:
+                # [日本語, ローマ字, 品詞\t意味]
+                kanji, romaji = tokens[0], tokens[1]
+                word_type, meaning = split_type_meaning(tokens[2])
+
+            elif len(tokens) >= 4:
+                kanji, romaji = tokens[0], tokens[1]
+                # tokens[2] がかなかどうか確認
+                if KANA_RE.match(tokens[2]):
+                    kana = tokens[2]
+                    word_type, meaning = split_type_meaning("\t".join(tokens[3:]))
+                else:
+                    word_type, meaning = split_type_meaning("\t".join(tokens[2:]))
+
+            # 意味が空の場合：品詞トークンの後ろにタブなしで続いていることも
+            # → 品詞プリセットと照合して残りを意味とする
+            if word_type and not meaning:
+                # 品詞プリセットに前方一致するか試みる
+                for preset in sorted(WORD_TYPES, key=len, reverse=True):
+                    if word_type.lower().startswith(preset.lower()):
+                        meaning = word_type[len(preset):].strip(" ,;-\t")
+                        word_type = preset
+                        break
+
+            if not kanji or not romaji or not word_type or not meaning:
+                skipped.append(" | ".join(tokens))
+                continue
+
+            # ── CSV 1行に変換 ──────────────────────────
+            def csv_field(s: str) -> str:
+                s = s.strip()
+                if "," in s or '"' in s:
+                    s = s.replace('"', '""')
+                    return f'"{s}"'
+                return s
+
+            row = ",".join([
+                csv_field(kanji),
+                csv_field(romaji),
+                csv_field(kana),
+                csv_field(word_type),
+                csv_field(meaning),
+            ])
+            csv_lines.append(row)
+
+        # ── テキストエリアを置き換え ──
+        result = "\n".join(csv_lines)
+        self.bulk_text.delete("1.0", "end")
+        self.bulk_text.insert("1.0", result)
+        self._bulk_clear_tags()
+
+        msg = f"✅ {len(csv_lines)} 語に変換しました。"
+        if skipped:
+            msg += f"\n⚠️ 変換できなかったブロック: {len(skipped)} 件\n"
+            msg += "\n".join(f"  • {s}" for s in skipped[:10])
+            if len(skipped) > 10:
+                msg += f"\n  …他 {len(skipped) - 10} 件"
+        messagebox.showinfo("変換完了", msg)
+        self.bulk_status.config(text=f"変換済: {len(csv_lines)} 語")
+
+    def _bulk_clear_tags(self):
+        self.bulk_text.tag_remove("error_line", "1.0", "end")
+        self.bulk_text.tag_remove("ok_line",    "1.0", "end")
+
+    def _bulk_parse(self) -> tuple[list[dict], list[tuple[int, str]]]:
+        """テキストを解析して (ok_rows, errors) を返す。errors = [(行番号, メッセージ)]"""
+        import io
+        raw = self.bulk_text.get("1.0", "end")
+        ok_rows: list[dict] = []
+        errors: list[tuple[int, str]] = []
+
+        for lineno, line in enumerate(raw.splitlines(), 1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue  # 空行・コメント行はスキップ
+
+            # CSV パーサで1行分を解析（カンマを含む品詞を "" で囲むことに対応）
+            try:
+                parsed = next(csv.reader(io.StringIO(stripped)))
+            except Exception:
+                errors.append((lineno, "解析エラー"))
+                continue
+
+            if len(parsed) < 4:
+                errors.append((lineno, f"フィールドが足りません（{len(parsed)} 個）: {stripped}"))
+                continue
+
+            # フィールド割り当て（かな は省略可）
+            if len(parsed) == 4:
+                kanji, romaji, word_type, meaning = (f.strip() for f in parsed)
+                kana = ""
+            else:
+                kanji, romaji, kana, word_type, meaning = (
+                    f.strip() for f in parsed[:5])
+
+            field_errors = []
+            if not kanji:     field_errors.append("日本語が空")
+            if not romaji:    field_errors.append("ローマ字が空")
+            if not word_type: field_errors.append("品詞が空")
+            if not meaning:   field_errors.append("意味が空")
+            if field_errors:
+                errors.append((lineno, "  /  ".join(field_errors)))
+                continue
+
+            ok_rows.append({
+                "ごい":    kanji,
+                "ローマ字": romaji,
+                "かな":    kana,
+                "Type":    word_type,
+                "Meaning": meaning,
+            })
+
+        return ok_rows, errors
+
+    def _bulk_preview(self):
+        self._bulk_clear_tags()
+        import io
+        raw = self.bulk_text.get("1.0", "end")
+        ok_rows, errors = self._bulk_parse()
+
+        # エラー行・OK行に色付け
+        error_linenos = {ln for ln, _ in errors}
+        ok_count = 0
+        for lineno, line in enumerate(raw.splitlines(), 1):
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            tag = "error_line" if lineno in error_linenos else "ok_line"
+            if tag == "ok_line":
+                ok_count += 1
+            self.bulk_text.tag_add(tag, f"{lineno}.0", f"{lineno}.end")
+
+        if errors:
+            msg = "\n".join(f"  行 {ln}: {msg}" for ln, msg in errors[:20])
+            if len(errors) > 20:
+                msg += f"\n  …他 {len(errors) - 20} 件"
+            messagebox.showwarning(
+                "プレビュー結果",
+                f"✅ 正常: {ok_count} 語　❌ エラー: {len(errors)} 行\n\n"
+                f"エラー行（赤）を修正してから保存してください:\n{msg}")
+        else:
+            messagebox.showinfo(
+                "プレビュー結果",
+                f"✅ すべての行が正常です。{ok_count} 語を追加できます。\n\n"
+                f"「💾 CSV に保存」で保存してください。")
+        self.bulk_status.config(
+            text=f"✅ {ok_count} 語  ❌ {len(errors)} 行エラー")
+
+    def _bulk_save(self):
+        ok_rows, errors = self._bulk_parse()
+        if not ok_rows:
+            messagebox.showwarning("警告", "追加できる単語がありません。\n"
+                                   "まず「✅ プレビュー」で内容を確認してください。")
+            return
+
+        msg = f"{len(ok_rows)} 語を vocabulary.csv に追加します。"
+        if errors:
+            msg += f"\n（{len(errors)} 行はエラーのためスキップされます）"
+        if not messagebox.askyesno("確認", msg):
+            return
+
+        base_n = next_number(self.rows)
+        for i, row in enumerate(ok_rows):
+            row["#"] = str(base_n + i)
+
+        self.rows.extend(ok_rows)
+        save_csv(self.rows)
+
+        self.bulk_text.delete("1.0", "end")
+        self._bulk_clear_tags()
+        self._refresh_count()
+        self._refresh_list()
+        self.bulk_status.config(text="")
+        messagebox.showinfo("保存完了",
+                            f"{len(ok_rows)} 語を保存しました。\n"
+                            f"現在の合計: {len(self.rows)} 語")
+
+    # ══════════════════════════════════════════════════
+    # タブ3: 一覧・編集
     # ══════════════════════════════════════════════════
     def _build_tab_list(self):
         # ── ツールバー ──
