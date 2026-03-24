@@ -80,6 +80,9 @@ class TesterPane(tk.Frame):
     def show_settings(self):
         self.switch_frame(_ui.SettingsFrame, words=self.words)
 
+    def show_weak_settings(self):
+        self.switch_frame(_ui.WeakWordSettingsFrame, words=self.words)
+
     def start_quiz(self, quiz_words, mode, all_words):
         self._last_mode      = mode
         self._last_all_words = all_words
@@ -267,6 +270,8 @@ class EJTesterMain(tk.Tk):
         self.minsize(900, 600)
         self.configure(bg=BG)
         self.resizable(True, True)
+        # 起動時に全画面（最大化）表示
+        self.after(0, lambda: self.state("zoomed"))
 
         # vocabulary.csv を確認
         if not os.path.exists(CSV_PATH):
