@@ -11,6 +11,17 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from dataclasses import dataclass, field
 
+# 間違えログ（mistake_log.py が同フォルダにある場合のみ使用）
+try:
+    import importlib.util as _ilu
+    _ml_spec = _ilu.spec_from_file_location(
+        "mistake_log",
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "mistake_log.py"))
+    _ml = _ilu.module_from_spec(_ml_spec)
+    _ml_spec.loader.exec_module(_ml)
+except Exception:
+    _ml = None
+
 
 # ──────────────────────────────────────────────
 # データモデル
@@ -128,6 +139,9 @@ class EJTesterApp(tk.Tk):
     def show_settings(self):
         self.switch_frame(SettingsFrame, words=self.words)
 
+    def show_weak_settings(self):
+        self.switch_frame(WeakWordSettingsFrame, words=self.words)
+
     def start_quiz(self, quiz_words: list[Word], mode: str, all_words: list[Word]):
         # 直前のテスト設定を記憶しておく（再テスト用）
         self._last_mode      = mode
@@ -195,10 +209,11 @@ class MenuFrame(tk.Frame):
         btn_frame.pack()
 
         buttons = [
-            ("▶  テストを開始する",     master.show_settings,   ACCENT),
-            ("🃏  フラッシュカード",     master.show_flashcards, "#2d6a4f"),
-            ("📖  単語一覧を見る",       master.show_word_list,  BG3),
-            ("✖  終了",                 master.quit,            "#4a4a6a"),
+            ("▶  テストを開始する",       master.show_settings,        ACCENT),
+            ("🔥  苦手単語テスト",         master.show_weak_settings,   "#7a2a2a"),
+            ("🃏  フラッシュカード",       master.show_flashcards,      "#2d6a4f"),
+            ("📖  単語一覧を見る",         master.show_word_list,       BG3),
+            ("✖  終了",                   master.quit,                 "#4a4a6a"),
         ]
         for label, cmd, color in buttons:
             styled_button(btn_frame, label, cmd, color=color, width=24).pack(pady=8)
@@ -380,6 +395,220 @@ class SettingsFrame(tk.Frame):
             quiz_words = list(filtered)
             random.shuffle(quiz_words)
 
+        self.master.start_quiz(quiz_words, mode, self.all_words)
+
+
+# ──────────────────────────────────────────────
+# 苦手単語テスト設定画面
+# ──────────────────────────────────────────────
+WEAK_RED = "#c0392b"   # 苦手テスト固有のアクセント色
+
+class WeakWordSettingsFrame(tk.Frame):
+    """間違え回数の多い単語を優先して出題する設定画面。"""
+
+    def __init__(self, master: EJTesterApp, words: list[Word]):
+        super().__init__(master, bg=BG)
+        self.master: EJTesterApp
+        self.all_words = words
+
+        # ── 間違えログを読み込む ──
+        self._log: dict[str, int] = _ml.load_log() if _ml else {}
+
+        # 間違え回数付きの単語リスト（回数 > 0 のみ）
+        self._weak: list[tuple[int, Word]] = sorted(
+            [(self._log.get(str(w.number), 0), w)
+             for w in words if self._log.get(str(w.number), 0) > 0],
+            key=lambda x: -x[0]
+        )
+
+        # ── タイトル ──
+        header = tk.Frame(self, bg=BG2, padx=20, pady=16)
+        header.pack(fill="x")
+        tk.Label(header, text="🔥  苦手単語テスト",
+                 font=FONT_TITLE, bg=BG2, fg="#f87171").pack(side="left")
+
+        # ── メインコンテンツ（左：設定 / 右：苦手単語プレビュー） ──
+        content = tk.Frame(self, bg=BG)
+        content.pack(fill="both", expand=True, padx=20, pady=10)
+        content.columnconfigure(0, weight=1)
+        content.columnconfigure(1, weight=2)
+        content.rowconfigure(0, weight=1)
+
+        # ── 左：設定パネル ──
+        left = tk.Frame(content, bg=BG2, padx=24, pady=20)
+        left.grid(row=0, column=0, sticky="nsew", padx=(0, 10))
+
+        if not self._weak:
+            tk.Label(left, text="まだ間違えた単語の\n記録がありません。",
+                     font=FONT_BODY, bg=BG2, fg=TEXT_DIM,
+                     justify="center").pack(pady=30)
+            tk.Label(left, text="通常のテストで間違えると\nここに蓄積されます。",
+                     font=FONT_SMALL, bg=BG2, fg=TEXT_DIM,
+                     justify="center").pack()
+            styled_button(left, "← 戻る", master.show_menu, BG3, width=14).pack(pady=20)
+            # 右パネルは空
+            tk.Frame(content, bg=BG).grid(row=0, column=1, sticky="nsew")
+            return
+
+        # ── 出題モード ──
+        section_label(left, "出題モード", fg=TEXT).pack(anchor="w", pady=(0, 6))
+        self.mode_var = tk.StringVar(value="1")
+        modes = [
+            ("1", "日本語 → 英語（4択）"),
+            ("2", "日本語 → 英語（記述）"),
+            ("3", "英語 → 日本語（記述）"),
+            ("4", "ローマ字 → 日本語（4択）"),
+            ("5", "ランダム（全モード混合）"),
+        ]
+        for val, label in modes:
+            tk.Radiobutton(
+                left, text=label, variable=self.mode_var, value=val,
+                bg=BG2, fg=TEXT, selectcolor=BG3, activebackground=BG2,
+                activeforeground=ACCENT2, font=FONT_BODY,
+            ).pack(anchor="w", pady=2)
+
+        tk.Frame(left, bg=BORDER, height=1).pack(fill="x", pady=12)
+
+        # ── 出題数・しきい値 ──
+        section_label(left, "出題設定", fg=TEXT).pack(anchor="w", pady=(0, 8))
+
+        count_row = tk.Frame(left, bg=BG2)
+        count_row.pack(anchor="w", pady=4)
+        tk.Label(count_row, text="出題数:", font=FONT_BODY, bg=BG2, fg=TEXT).pack(side="left")
+        self.count_var = tk.IntVar(value=min(20, len(self._weak)))
+        tk.Spinbox(
+            count_row, from_=1, to=len(self._weak),
+            textvariable=self.count_var, width=5,
+            font=FONT_BODY, bg=BG3, fg=TEXT, buttonbackground=BG3,
+            relief="flat", bd=4,
+        ).pack(side="left", padx=8)
+        tk.Label(count_row, text=f"語 (最大 {len(self._weak)} 語)",
+                 font=FONT_SMALL, bg=BG2, fg=TEXT_DIM).pack(side="left")
+
+        min_row = tk.Frame(left, bg=BG2)
+        min_row.pack(anchor="w", pady=4)
+        tk.Label(min_row, text="最小間違え回数:", font=FONT_BODY, bg=BG2, fg=TEXT).pack(side="left")
+        max_mistakes = self._weak[0][0] if self._weak else 1
+        self.min_wrong_var = tk.IntVar(value=1)
+        tk.Spinbox(
+            min_row, from_=1, to=max(max_mistakes, 1),
+            textvariable=self.min_wrong_var, width=4,
+            font=FONT_BODY, bg=BG3, fg=TEXT, buttonbackground=BG3,
+            relief="flat", bd=4,
+            command=self._refresh_preview,
+        ).pack(side="left", padx=8)
+        tk.Label(min_row, text="回以上",
+                 font=FONT_SMALL, bg=BG2, fg=TEXT_DIM).pack(side="left")
+
+        tk.Frame(left, bg=BORDER, height=1).pack(fill="x", pady=12)
+
+        # ── リセットボタン ──
+        tk.Button(left, text="🗑  間違えログをリセット",
+                  command=self._reset_log,
+                  bg="#4a1a1a", fg=TEXT, font=FONT_SMALL,
+                  relief="flat", cursor="hand2", padx=10, pady=6).pack(anchor="w", pady=(0, 10))
+
+        # ── アクションボタン ──
+        btn_row = tk.Frame(left, bg=BG2)
+        btn_row.pack(anchor="w", pady=(4, 0))
+        styled_button(btn_row, "🔥  テスト開始", self._start,
+                      WEAK_RED, width=14).pack(side="left", padx=(0, 8))
+        styled_button(btn_row, "← 戻る", master.show_menu,
+                      BG3, width=8).pack(side="left")
+
+        # ── 右：苦手単語プレビュー ──
+        right = tk.Frame(content, bg=BG2, padx=16, pady=16)
+        right.grid(row=0, column=1, sticky="nsew")
+
+        tk.Label(right, text="📊  間違え回数ランキング",
+                 font=FONT_HEAD, bg=BG2, fg=ACCENT2).pack(anchor="w", pady=(0, 8))
+
+        list_frame = tk.Frame(right, bg=BG2)
+        list_frame.pack(fill="both", expand=True)
+
+        vsb = tk.Scrollbar(list_frame)
+        vsb.pack(side="right", fill="y")
+
+        cols = ("No.", "日本語", "ローマ字", "意味", "間違え回数")
+        self.preview_tree = ttk.Treeview(
+            list_frame, columns=cols, show="headings",
+            yscrollcommand=vsb.set, height=16)
+        vsb.config(command=self.preview_tree.yview)
+
+        s = ttk.Style()
+        s.configure("Weak.Treeview",
+                    background=BG2, foreground=TEXT,
+                    fieldbackground=BG2, rowheight=26, font=FONT_SMALL)
+        s.configure("Weak.Treeview.Heading",
+                    background=BG3, foreground=ACCENT2, font=FONT_SMALL)
+        s.map("Weak.Treeview", background=[("selected", BG3)])
+        self.preview_tree.config(style="Weak.Treeview")
+
+        col_widths = {"No.": 40, "日本語": 130, "ローマ字": 110,
+                      "意味": 250, "間違え回数": 80}
+        for col in cols:
+            self.preview_tree.heading(col, text=col)
+            self.preview_tree.column(col, width=col_widths[col], anchor="w")
+        self.preview_tree.pack(side="left", fill="both", expand=True)
+
+        # タグ：回数に応じた色
+        self.preview_tree.tag_configure("high",   foreground=RED)
+        self.preview_tree.tag_configure("medium", foreground=YELLOW)
+        self.preview_tree.tag_configure("low",    foreground=TEXT)
+
+        self._refresh_preview()
+
+    def _refresh_preview(self):
+        """しきい値に応じてプレビューリストを更新する"""
+        if not hasattr(self, "preview_tree"):
+            return
+        self.preview_tree.delete(*self.preview_tree.get_children())
+        try:
+            min_w = self.min_wrong_var.get()
+        except Exception:
+            min_w = 1
+        filtered = [(cnt, w) for cnt, w in self._weak if cnt >= min_w]
+        for cnt, w in filtered:
+            if cnt >= 5:
+                tag = "high"
+            elif cnt >= 3:
+                tag = "medium"
+            else:
+                tag = "low"
+            self.preview_tree.insert("", "end",
+                values=(w.number, w.display_japanese(), w.romaji, w.meaning, f"❌ {cnt}回"),
+                tags=(tag,))
+        # 出題数の最大値を更新
+        if hasattr(self, "count_var"):
+            n = max(1, len(filtered))
+            self.count_var.set(min(self.count_var.get(), n))
+
+    def _reset_log(self):
+        if not messagebox.askyesno("確認",
+                "間違えログを全てリセットしますか？\nこの操作は元に戻せません。"):
+            return
+        if _ml:
+            _ml.reset_log()
+        self._log = {}
+        self._weak = []
+        messagebox.showinfo("完了", "間違えログをリセットしました。")
+        self.master.show_menu()
+
+    def _start(self):
+        try:
+            min_w = self.min_wrong_var.get()
+            n     = self.count_var.get()
+        except Exception:
+            return
+        filtered = [(cnt, w) for cnt, w in self._weak if cnt >= min_w]
+        if not filtered:
+            messagebox.showwarning("警告",
+                "条件に一致する苦手単語がありません。\nしきい値を下げてみてください。")
+            return
+        # 間違え回数の多い順に並べ、上位 n 件を出題
+        quiz_words = [w for _, w in filtered[:n]]
+        random.shuffle(quiz_words)
+        mode = self.mode_var.get()
         self.master.start_quiz(quiz_words, mode, self.all_words)
 
 
@@ -1067,6 +1296,12 @@ class ListQuizFrame(tk.Frame):
                 lbl = self.result_labels[idx]
                 if lbl:
                     lbl.config(text=f"❌ {w.meaning}", fg=RED)
+        # 間違えログを更新
+        if _ml is not None:
+            wrong_nums   = [w.number for w in self.result.wrong_words]
+            correct_nums = [w.number for w in self.quiz_words
+                            if w not in self.result.wrong_words]
+            _ml.record_results(wrong_nums, correct_nums)
         self.master.show_result(self.result)
 
 
@@ -1365,6 +1600,8 @@ class WordListFrame(tk.Frame):
         self.all_words = list(words)
         self.current_words = list(words)   # 現在表示中の順序
         self.show_meaning = True           # 意味列の表示フラグ
+        # 間違えログを読み込む
+        self._log: dict[str, int] = _ml.load_log() if _ml else {}
 
         # ── トップバー ──
         top = tk.Frame(self, bg=BG2, padx=16, pady=12)
@@ -1426,14 +1663,20 @@ class WordListFrame(tk.Frame):
                         font=FONT_SMALL)
         style.map("Treeview", background=[("selected", BG3)])
 
-        self.cols = ("順", "No.", "日本語", "ローマ字", "品詞", "意味")
+        self.cols = ("順", "No.", "日本語", "ローマ字", "品詞", "意味", "間違×")
         self.tree = ttk.Treeview(table_frame, columns=self.cols,
                                   show="headings", yscrollcommand=scrollbar.set)
-        widths = {"順": 45, "No.": 45, "日本語": 155, "ローマ字": 120, "品詞": 155, "意味": 320}
+        widths = {"順": 40, "No.": 45, "日本語": 145, "ローマ字": 115,
+                  "品詞": 145, "意味": 280, "間違×": 60}
         for col in self.cols:
             self.tree.heading(col, text=col,
                               command=lambda c=col: self._sort(c))
             self.tree.column(col, width=widths[col], anchor="w", minwidth=30)
+
+        # 間違え回数に応じたタグ色
+        self.tree.tag_configure("mis_high",   foreground=RED)
+        self.tree.tag_configure("mis_medium", foreground=YELLOW)
+        self.tree.tag_configure("mis_low",    foreground=TEXT)
 
         self.tree.pack(side="left", fill="both", expand=True)
         scrollbar.config(command=self.tree.yview)
@@ -1449,9 +1692,13 @@ class WordListFrame(tk.Frame):
         self.tree.delete(*self.tree.get_children())
         for rank, w in enumerate(words, 1):
             meaning_cell = w.meaning if self.show_meaning else "──────"
+            cnt = self._log.get(str(w.number), 0)
+            mis_cell = f"❌ {cnt}" if cnt > 0 else "—"
+            tag = "mis_high" if cnt >= 5 else ("mis_medium" if cnt >= 3 else "mis_low")
             self.tree.insert("", "end",
                              values=(rank, w.number, w.display_japanese(),
-                                     w.romaji, w.word_type, meaning_cell))
+                                     w.romaji, w.word_type, meaning_cell, mis_cell),
+                             tags=(tag,))
         self.lbl_status.config(
             text=f"  表示中: {len(words)} 語  /  全 {len(self.all_words)} 語"
                  + ("  |  🔀 ランダム順" if self.current_words != self.all_words else "  |  🔢 番号順"))
