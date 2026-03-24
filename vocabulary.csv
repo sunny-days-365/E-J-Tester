@@ -299,3 +299,203 @@
 298,今年,kotoshi,ことし,Noun,this year
 299,交番,kouban,こうばん,Noun,police box
 300,紅茶,koucha,こうちゃ,Noun,black tea
+301,公園,kouen,こうえん,Noun,park
+302,交差点,kousaten,こうさてん,Noun,intersection
+303,口,kuchi,くち,Noun,"mouth, opening"
+304,果物,kudamono,くだもの,Noun,fruit
+305,下さい,kudasai,ください,Expression,please
+306,曇り,kumori,くもり,Noun,cloudiness; cloudy weather
+307,曇る,kumoru,くもる,"Verb, Godan verb, Intransitive verb","to become cloudy, to become dim"
+308,国,kuni,くに,Noun,country; state; region
+309,暗い,kurai,くらい,"Adjective, い-adjective",dark; gloomy; murky
+310,クラス,kurasu,,"Noun, Katakana",class
+311,黒,kuro,くろ,Noun,black
+312,黒い,kuroi,くろい,い-adjective,black
+313,来る,kuru,くる,"Verb, Intransitive verb",to come
+314,車,kuruma,くるま,Noun,car; automobile; vehicle
+315,薬,kusuri,くすり,Noun,medicine
+316,靴,kutsu,くつ,Noun,shoes
+317,靴下,kutsushita,くつした,Noun,socks
+318,去年,kyonen,きょねん,Noun,last year
+319,今日,kyou,きょう,"Noun, Temporal noun",today; this day
+320,兄弟,kyoudai,きょうだい,Noun,siblings; brothers and sisters​; mate
+321,教室,kyoushitsu,きょうしつ,Noun,classroom
+322,九,kyuu,きゅう,"Noun, Numeric",nine; 9
+323,マッチ,macchi,,"Noun, Katakana",match
+324,町,machi,まち,Noun,town; block; neighborhood
+325,窓,mado,まど,Noun,window
+326,前,mae,まえ,"Noun, Suffix",previous; before; in front; ago
+327,曲がる,magaru,まがる,"Verb, Godan verb, Intransitive verb","to turn, to bend"
+328,毎朝,maiasa,まいあさ,Noun,every morning
+329,毎晩,maiban,まいばん,Noun,every night
+330,毎日,mainichi,まいにち,Noun,every day
+331,毎週,maishuu,まいしゅう,Noun,every week
+332,毎年,maitoshi / mainen,,まいとし / まいねん,Noun	every year; yearly; annually
+333,毎月,maitsuki,まいつき,Noun,every month; monthly
+334,万,man,まん,"Noun, Numeric","10,000; ten thousand"
+335,万年筆,mannenhitsu,まんねんひつ,Noun,fountain pen
+336,丸い,marui,まるい,"Adjective, い-adjective","round,circular"
+337,真っ直ぐ,massugu,まっすぐ,"Noun, Adjective, な-adjective, Adverb","straight ahead,direct"
+338,待つ,matsu,まつ,"Verb, Godan verb, Intransitive verb, Transitive verb",to wait​
+339,不味い,mazui,まずい,"Adjective, い-adjective",unpleasant
+340,目,me,め,Noun,eye
+341,メートル,meetoru,,"Noun, Katakana",metre; meter
+342,眼鏡,megane,めがね,Noun,glasses
+343,道,michi,みち,Noun,road; street
+344,緑,midori,みどり,Noun,green
+345,磨く,migaku,みがく,"Verb, Godan verb, Intransitive verb",to polish; to shine; to brush (e.g. teeth)
+346,右,migi,みぎ,Noun,right; right hand side
+347,短い,mijikai,みじかい,"Adjective, い-adjective",short
+348,三日,mikka,みっか,Noun,the third day of the month / 3 days
+349,耳,mimi,みみ,Noun,ear; hearing
+350,南,minami,みなみ,Noun,south
+351,皆さん,minasan,みなさん,Noun,everyone
+352,みんな,minna,,"Noun, Adverb",all; everyone; everybody
+353,見る,miru,みる,"Verb, Ichidan verb, Transitive verb",to see; to look; to watch; to view; to observe
+354,店,mise,みせ,Noun,store; shop; establishment; restaurant
+355,見せる,miseru,みせる,"Verb, Ichidan verb, Transitive verb",to show; to display
+356,三つ,mittsu,みっつ,"Noun, Numeric",three; 3
+357,水,mizu,みず,Noun,water; fluid; liquid​
+358,木曜日,mokuyoubi,もくようび,Noun,Thursday
+359,門,mon,もん,Noun,gate
+360,問題,mondai,もんだい,Noun,problem; question (e.g. on a test)
+361,物,mono,もの,Noun,thing
+362,持つ,motsu,もつ,"Verb, Godan verb",to hold
+363,もっと,motto,,Adverb,more; longer; further
+364,もう一度,mouichido,もういちど,Expression,once more; again
+365,六日,muika,むいか,Noun,sixth day of the month / 6 days
+366,向こう,mukou,むこう,Noun,over there
+367,村,mura,むら,Noun,village
+368,六つ,muttsu,むっつ,"Noun, Numeric",six; 6
+369,難しい,muzukashii,むずかしい,"Adjective, い-adjective",difficult
+370,長い,nagai,ながい,"Adjective, い-adjective",long (distance)​; long (time); lengthy.
+371,ナイフ,naifu,,"Noun, Katakana",knife
+372,中,naka,なか,Noun,inside; in; within; center
+373,鳴く,naku,なく,"Verb, Godan verb, Intransitive verb",animal noise. to chirp
+374,無くす,nakusu,なくす,"Verb, Godan verb, Transitive verb",to lose (something)
+375,名前,namae,なまえ,Noun,name; full name; given name
+376,七つ,nanatsu,ななつ,"Noun, Numeric",seven; 7
+377,何,nani,なに,"Noun, Pronoun, Prefix",what
+378,七日,nanoka,なのか,Noun,seventh day of the month / 7 days
+379,並べる,naraberu,ならべる,"Verb, Ichidan verb, Transitive verb","to line up,to set up"
+380,並ぶ,narabu,ならぶ,"Verb, Godan verb, Intransitive verb","to line up,to stand in a line"
+381,習う,narau,ならう,"Verb, Godan verb, Transitive verb",to be taught; to learn (from a teacher)
+382,夏,natsu,なつ,Noun,summer
+383,夏休み,natsuyasumi,なつやすみ,Noun,summer vacation; summer holiday
+384,何故,naze,なぜ,Adverb,why; how
+385,猫,neko,ねこ,Noun,cat
+386,ネクタイ,nekutai,,"Noun, Katakana",tie; necktie
+387,寝る,neru,ねる,"Verb, Ichidan verb, Intransitive verb",to sleep; to go to bed; to lie down
+388,二,ni,に,"Noun, Numeric",two; 2
+389,日曜日,nichiyoubi,にちようび,Noun,Sunday
+390,賑やか,nigiyaka,にぎやか,"Adjective, な-adjective","bustling,busy"
+391,日記,nikki,にっき,Noun,diary; journal
+392,肉,niku,にく,Noun,meat
+393,荷物,nimotsu,にもつ,Noun,luggage; baggage
+394,西,nishi,にし,Noun,west
+395,庭,niwa,にわ,Noun,garden
+396,登る,noboru,のぼる,"Verb, Godan verb, Intransitive verb",to climb
+397,飲み物,nomimono,のみもの,Noun,drink; beverage
+398,飲む,nomu,のむ,"Verb, Godan verb, Transitive verb",to drink
+399,ノート,nooto,,"Noun, Katakana",notebook
+400,乗る,noru,のる,"Verb, Godan verb, Intransitive verb","to get on (train, plane, bus, ship, etc.)"
+401,脱ぐ,nugu,ぬぐ,"Verb, Godan verb, Transitive verb",to take off clothes
+402,温い,nurui,ぬるい,"Adjective, い-adjective",luke warm
+403,ニュース,nyuusu,,"Noun, Katakana",news
+404,おばあさん,obaasan,,Noun,grandmother
+405,伯母さん,obasan,おばさん,Noun,aunt; old lady
+406,お弁当,obentou,おべんとう,Noun,lunch box; Japanese box lunch
+407,覚える,oboeru,おぼえる,"Verb, Ichidan verb, Transitive verb",to remember
+408,お茶,ocha,おちゃ,Noun,tea
+409,お風呂,ofuro,おふろ,Noun,bath
+410,美味しい,oishii,おいしい,い-adjective,delicious
+411,伯父さん,ojisan,おじさん,Noun,uncle; old man; mister
+412,お母さん,okaasan,おかあさん,Noun,mother; mom; mum; ma
+413,お金,okane,おかね,Noun,money
+414,お菓子,okashi,おかし,Noun,confections; sweets; candy
+415,起きる,okiru,おきる,"Verb, Ichidan verb, Intransitive verb",to get up; to wake up
+416,置く,oku,おく,"Verb, Godan verb, Transitive verb",to put; to place​
+417,奥さん,okusan,おくさん,Noun,wife; your wife; his wife
+418,お巡りさん,omawari san,おまわりさん,Noun,police officer (friendly term for policeman)
+419,重い,omoi,おもい,い-adjective,heavy
+420,面白い,omoshiroi,おもしろい,"Adjective, い-adjective",interesting
+421,同じ,onaji,おなじ,"Noun, Adverb",same
+422,お腹,onaka,おなか,Noun,stomach
+423,お姉さん,oneesan,おねえさん,Noun,elder sister; young lady; miss; ma'am
+424,音楽,ongaku,おんがく,Noun,music
+425,お兄さん,oniisan,おにいさん,Noun,older brother; elder brother; young man; buddy
+426,女,onna,おんな,"Noun, Prefix",woman; female sex
+427,女の子,onnanoko,おんなのこ,"Noun, Expression",girl; daughter; young women
+428,多い,ooi,おおい,"Adjective, い-adjective",many; numerous; a lot; large quantity; frequent
+429,大きい,ookii,おおきい,"Adjective, い-adjective",big; large; great; important
+430,大きな,ookina,おおきな,Pre-noun adjectival,big; large; great​
+431,大勢,oozei,おおぜい,Noun,crowd of people; great number of people
+432,降りる,oriru,おりる,"Verb, Ichidan verb, Intransitive verb",to get off
+433,お酒,osake,おさけ,Noun,alcohol
+434,お皿,osara,おさら,Noun,"plate, dish"
+435,教える,oshieru,おしえる,"Verb, Ichidan verb, Transitive verb",to teach
+436,遅い,osoi,おそい,"Adjective, い-adjective",slow; time-consuming; late
+437,押す,osu,おす,"Verb, Godan verb, Transitive verb",to push; to press​
+438,お手洗い,otearai,おてあらい,Noun,toilet; restroom; lavatory; bathroom
+439,男,otoko,おとこ,Noun,man; male
+440,男の子,otokonoko,おとこのこ,"Noun, Expression",boy; male child; baby boy
+441,大人,otona,おとな,Noun,adult
+442,一昨日,ototoi,おととい,Noun,day before yesterday
+443,一昨年,ototoshi,おととし,Noun,year before last
+444,お父さん,otousan,おとうさん,Noun,father; dad; papa; pa; pop; daddy
+445,弟,otouto,おとうと,Noun,younger brother
+446,終わる,owaru,おわる,"Verb, Godan verb, Intransitive verb",to finish; to end
+447,泳ぐ,oyogu,およぐ,"Verb, Godan verb, Intransitive verb",to swim
+448,パーティー,paatii,,"Noun, Katakana",party
+449,パン,pan,,"Noun, Katakana",bread
+450,ページ,peeji,,"Noun, Katakana",page
+451,ペン,pen,,"Noun, Katakana",pen
+452,ペット,petto,,"Noun, Katakana",pet
+453,ポケット,poketto,,Noun,pocket
+454,ポスト,posuto,,"Noun, Katakana",post
+455,プール,puuru,,"Noun, Katakana",swimming pool
+456,来月,raigetsu,らいげつ,Noun,next month
+457,来年,rainen,らいねん,Noun,next year
+458,来週,raishuu,らいしゅう,Noun,next week
+459,ラジオ,rajiio,,"Noun, Katakana",radio
+460,零,rei,れい,Noun,zero
+461,冷蔵庫,reizouko,れいぞうこ,Noun,refrigerator
+462,レコード,rekoodo,,"Noun, Katakana",record
+463,練習,renshuu,れんしゅう,"Noun, Verb, Suru verb",practice; practicing
+464,レストラン,resutoran,,"Noun, Katakana",restaurant
+465,立派,rippa,りっぱ,"Adjective, な-adjective",splendid
+466,六,roku,ろく,"Noun, Numeric",six; 6
+467,廊下,rouka,ろうか,Noun,corridor; hallway; passageway
+468,旅行,ryokou,りょこう,"Noun, Verb, Suru verb",travel; trip; journey; excursion; tour
+469,料理,ryouri,りょうり,"Noun, Suru verb",cuisine
+470,両親,ryoushin,りょうしん,Noun,parents; both parents
+471,留学生,ryuugakusei,りゅうがくせい,Noun,overseas student; exchange student
+472,さあ,saa,,Conjunction,well…
+473,財布,saifu,さいふ,Noun,purse; wallet
+474,魚,sakana,さかな,Noun,fish
+475,先,saki,さき,"Noun, Prefix, Suffix",previous; prior; first; earlier
+476,咲く,saku,さく,"Verb, Godan verb, Intransitive verb",to bloom
+477,作文,sakubun,さくぶん,Noun,writing; composition
+478,寒い,samui,さむい,"Adjective, い-adjective",cold
+479,三,san,さん,"Noun, Numeric",three; 3
+480,散歩,sanpo,さんぽ,"Noun, Verb, Suru verb",walk; stroll
+481,再来年,sarainen,さらいねん,Noun,year after next
+482,差す,sasu,さす,"Verb, Godan verb, Transitive verb","to stretch out hands, to raise an umbrella"
+483,砂糖,satou,さとう,Noun,sugar
+484,背,se,せ,Noun,height; stature; back; spine
+485,背広,sebiro,せびろ,Noun,business suit
+486,セーター,seetaa,,"Noun, Katakana",sweater; jumper
+487,生徒,seito,せいと,Noun,pupil; student
+488,石鹼,sekken,せっけん,Noun,soap
+489,狭い,semai,せまい,い-adjective,narrow
+490,千,sen,せん,"Noun, Numeric","1,000; thousand"
+491,先月,sengetsu,せんげつ,Noun,last month
+492,先生,sensei,せんせい,"Noun, Suffix",teacher; instructor; master
+493,先週,senshuu,せんしゅう,Noun,last week
+494,洗濯,sentaku,せんたく,"Noun, Suru verb",washing; laundry
+495,写真,shashin,しゃしん,Noun,photograph; photo
+496,シャツ,shatsu,,"Noun, Katakana",shirt
+497,シャワー,shawaa,,"Noun, Katakana",shower
+498,四,shi,し,"Noun, Numeric",four; 4
+499,七,shichi,しち,"Noun, Numeric",seven; 7
+500,仕事,shigoto,しごと,"Noun, Verb, Suru verb",work; job; business
